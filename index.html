@@ -513,29 +513,51 @@
   });
 
   // ── Image page renderer ──────────────────
-  function renderImagePage(imageUrl, downloadUrl) {
+  async function renderImagePage(imageUrl, downloadUrl) {
     const card = document.getElementById('img-card-content');
 
     if (!imageUrl) {
-      card.innerHTML = `
-        <div class="error-state">
-          <p>URL da imagem não encontrada.</p>
-          <button class="btn btn-outline" onclick="goBack()">← Voltar</button>
-        </div>`;
+      card.innerHTML = '<div class="error-state"><p>URL da imagem não encontrada.</p><button class="btn btn-outline" onclick="goBack()">← Voltar</button></div>';
       return;
     }
 
-    card.innerHTML = `
-      <img src="${escHtml(imageUrl)}" alt="Resumo gerado"
-           onerror="this.style.display='none'; document.getElementById('img-error').style.display='block'" />
-      <p id="img-error" style="display:none;color:var(--red);margin-bottom:16px;text-align:center">
-        Não foi possível carregar a imagem.
-      </p>
-      <div class="img-actions">
-        <button class="btn btn-outline" onclick="goBack()">← Voltar</button>
-        <button class="btn btn-green" onclick="downloadImg('${escHtml(downloadUrl)}')">⬇ Baixar Imagem</button>
-      </div>
-    `;
+    // Skeleton enquanto carrega
+    card.innerHTML =
+      '<div id="img-skeleton" style="width:100%;aspect-ratio:16/9;background:rgba(255,255,255,0.07);border-radius:12px;margin-bottom:28px;display:flex;align-items:center;justify-content:center;">' +
+        '<div style="width:36px;height:36px;border:3px solid rgba(255,255,255,0.2);border-top-color:#60a5fa;border-radius:50%;animation:spin 0.8s linear infinite;"></div>' +
+      '</div>' +
+      '<div class="img-actions">' +
+        '<button class="btn btn-outline" onclick="goBack()">← Voltar</button>' +
+        '<button class="btn btn-green" onclick="downloadImg(' + "'" + downloadUrl + "'" + ')">⬇ Baixar Imagem</button>' +
+      '</div>';
+
+    // Tenta fetch como blob para contornar bloqueio de exibição por CORS
+    async function tryLoad() {
+      try {
+        const imgResp = await fetch(imageUrl);
+        if (!imgResp.ok) throw new Error('fetch falhou');
+        const blob = await imgResp.blob();
+        return URL.createObjectURL(blob);
+      } catch (_) {
+        return imageUrl; // fallback direto
+      }
+    }
+
+    const src = await tryLoad();
+    const skeleton = document.getElementById('img-skeleton');
+    if (!skeleton) return;
+
+    const img = document.createElement('img');
+    img.alt = 'Resumo gerado';
+    img.style.cssText = 'width:100%;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);margin-bottom:28px;display:block;';
+    img.onerror = () => {
+      const msg = document.createElement('p');
+      msg.textContent = 'Não foi possível exibir a imagem, mas você pode baixá-la pelo botão abaixo.';
+      msg.style.cssText = 'color:var(--muted);text-align:center;margin-bottom:28px;font-size:14px;';
+      skeleton.replaceWith(msg);
+    };
+    img.src = src;
+    skeleton.replaceWith(img);
   }
 
   function goBack() {
