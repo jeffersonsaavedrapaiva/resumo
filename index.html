@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resumo de Aula Happy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0f1e;
+      --bg2: #0d1529;
+      --surface: rgba(255,255,255,0.06);
+      --surface-hover: rgba(255,255,255,0.10);
+      --border: rgba(255,255,255,0.12);
+      --border-focus: rgba(99,179,237,0.6);
+      --white: #ffffff;
+      --muted: rgba(255,255,255,0.55);
+      --accent: #3b82f6;
+      --accent2: #60a5fa;
+      --green: #10b981;
+      --red: #f87171;
+      --input-bg: rgba(255,255,255,0.92);
+      --input-text: #1e293b;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background decorative icons ── */
+    .bg-decor {
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none; overflow: hidden;
+    }
+    .bg-decor svg {
+      position: absolute;
+      opacity: 0.045;
+      color: white;
+    }
+    .bg-decor .icon-tl { top: 15%; left: 12%; width: 110px; height: 110px; }
+    .bg-decor .icon-tr { top: 15%; right: 12%; width: 110px; height: 110px; }
+    .bg-decor .icon-bl { bottom: 18%; left: 12%; width: 110px; height: 110px; }
+    .bg-decor .icon-br { bottom: 18%; right: 12%; width: 110px; height: 110px; }
+    .bg-decor .icon-center { top: 50%; left: 50%; transform: translate(-50%,-50%); width: 180px; height: 180px; opacity: 0.025; }
+
+    /* Mesh gradient */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 20%, rgba(59,130,246,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 80% 80%, rgba(16,185,129,0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(99,102,241,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* ── Page wrapper ── */
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 20px 80px;
+    }
+    .page.active { display: flex; }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeDown 0.7s ease both;
+    }
+    header .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      background: rgba(59,130,246,0.15);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      margin-bottom: 14px;
+    }
+    header h1 {
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      text-shadow: 0 0 60px rgba(59,130,246,0.3);
+    }
+
+    /* ── Card ── */
+    .card {
+      width: 100%; max-width: 580px;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 36px 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.04) inset;
+      animation: fadeUp 0.7s ease 0.1s both;
+    }
+
+    .card h2 {
+      font-family: 'Nunito', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Form fields ── */
+    .field { margin-bottom: 22px; }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 8px;
+    }
+    input, select, textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 2px solid transparent;
+      border-radius: var(--radius-sm);
+      color: var(--input-text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14.5px;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 38px;
+      cursor: pointer;
+    }
+
+    .error-msg {
+      font-size: 12px;
+      color: var(--red);
+      margin-top: 5px;
+      display: none;
+    }
+    .field.has-error input,
+    .field.has-error select,
+    .field.has-error textarea {
+      border-color: rgba(248,113,113,0.6);
+    }
+    .field.has-error .error-msg { display: block; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14.5px;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 12px 22px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      width: 100%;
+      font-size: 15px;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 4px 20px rgba(59,130,246,0.35);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #2563eb;
+      box-shadow: 0 6px 24px rgba(59,130,246,0.45);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .btn-outline {
+      background: rgba(255,255,255,0.12);
+      color: white;
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.2); }
+    .btn-green {
+      background: var(--green);
+      color: white;
+      box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+    }
+    .btn-green:hover { background: #059669; transform: translateY(-1px); }
+
+    /* Spinner */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      display: none;
+    }
+    .loading .spinner { display: block; }
+    .loading .btn-label { display: none; }
+
+    /* ── Toast ── */
+    #toast-container {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      min-width: 280px; max-width: 380px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      animation: slideIn 0.35s ease both;
+      pointer-events: all;
+    }
+    .toast strong { display: block; font-weight: 700; font-size: 13.5px; margin-bottom: 2px; }
+    .toast.success { background: #065f46; border: 1px solid #10b981; color: #d1fae5; }
+    .toast.error { background: #7f1d1d; border: 1px solid #f87171; color: #fee2e2; }
+    .toast.fade-out { animation: fadeOut 0.35s ease forwards; }
+
+    /* ── Image page ── */
+    .img-card {
+      width: 100%; max-width: 720px;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      animation: fadeUp 0.6s ease both;
+    }
+    .img-card img {
+      width: 100%;
+      border-radius: var(--radius);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      margin-bottom: 28px;
+      display: block;
+    }
+    .img-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ── Error state (image page) ── */
+    .error-state {
+      text-align: center;
+      padding: 40px;
+    }
+    .error-state p { color: var(--muted); margin-bottom: 24px; }
+
+    /* ── Animations ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateX(30px); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      .card, .img-card { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background decorative icons (SVG inline) -->
+<div class="bg-decor">
+  <!-- Laptop -->
+  <svg class="icon-tl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M1 21h22"/></svg>
+  <!-- Graduation cap -->
+  <svg class="icon-tr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 10l-10-7L2 10l10 7 10-7z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
+  <!-- Blocks / toy brick -->
+  <svg class="icon-bl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+  <!-- Code -->
+  <svg class="icon-br" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+  <!-- Circle center -->
+  <svg class="icon-center" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><circle cx="12" cy="12" r="11"/></svg>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- ════════════════════════════════════
+     PAGE 1 — FORM
+════════════════════════════════════ -->
+<div class="page active" id="page-form">
+  <header>
+    <div class="badge">✦ Sistema de Registros</div>
+    <h1>Resumo de Aula Happy</h1>
+  </header>
+
+  <div class="card">
+    <h2>Criar Novo Resumo</h2>
+
+    <form id="resumo-form" novalidate>
+
+      <div class="field" id="field-data">
+        <label for="data">Data da Aula</label>
+        <input type="date" id="data" name="data" />
+        <span class="error-msg">A data é obrigatória.</span>
+      </div>
+
+      <div class="field" id="field-professor">
+        <label for="professor">Nome do Professor</label>
+        <select id="professor" name="professor">
+          <option value="">Selecione um Professor</option>
+          <option value="Jefferson Paiva">Jefferson Paiva</option>
+          <option value="Marcelle Lima">Marcelle Lima</option>
+          <option value="Adson Selton">Adson Selton</option>
+          <option value="Larissa Santos">Larissa Santos</option>
+        </select>
+        <span class="error-msg">Selecione um professor.</span>
+      </div>
+
+      <div class="field" id="field-turma">
+        <label for="turma">Turma</label>
+        <input type="text" id="turma" name="turma" placeholder="Digite a turma" />
+        <span class="error-msg">Nome da turma deve ter pelo menos 2 caracteres.</span>
+      </div>
+
+      <div class="field" id="field-dia">
+        <label for="dia">Dia da Semana / Horário (ex: Terça-feira 14h)</label>
+        <input type="text" id="dia" name="dia" placeholder="Digite o dia da semana e horário" />
+        <span class="error-msg">Informe o dia e horário (mínimo 2 caracteres).</span>
+      </div>
+
+      <div class="field" id="field-resumo">
+        <label for="resumo">Resumo da Aula</label>
+        <textarea id="resumo" name="resumo" placeholder="Digite o resumo da aula"></textarea>
+        <span class="error-msg">Resumo deve ter pelo menos 10 caracteres.</span>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="submit-btn">
+        <div class="spinner"></div>
+        <span class="btn-label">Salvar Resumo</span>
+      </button>
+
+    </form>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     PAGE 2 — GENERATED IMAGE
+════════════════════════════════════ -->
+<div class="page" id="page-imagem">
+  <header>
+    <div class="badge">✦ Resultado</div>
+    <h1>Resumo Gerado</h1>
+  </header>
+
+  <div class="img-card" id="img-card-content">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+
+<script>
+  const WEBHOOK_URL = 'https://webhook.jspinformatica.dev.br/webhook/resumos';
+
+  // ── Router ──────────────────────────────
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // ── Toast ────────────────────────────────
+  function showToast(title, desc, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `<strong>${title}</strong>${desc || ''}`;
+    container.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('fade-out');
+      el.addEventListener('animationend', () => el.remove());
+    }, 4000);
+  }
+
+  // ── Validate field ───────────────────────
+  function validateField(wrapId, value, rule) {
+    const wrap = document.getElementById(wrapId);
+    const valid = rule(value);
+    wrap.classList.toggle('has-error', !valid);
+    return valid;
+  }
+
+  // ── Form submit ──────────────────────────
+  const form = document.getElementById('resumo-form');
+  const submitBtn = document.getElementById('submit-btn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data      = document.getElementById('data').value;
+    const professor = document.getElementById('professor').value;
+    const turma     = document.getElementById('turma').value.trim();
+    const dia       = document.getElementById('dia').value.trim();
+    const resumo    = document.getElementById('resumo').value.trim();
+
+    const v1 = validateField('field-data',      data,      v => v !== '');
+    const v2 = validateField('field-professor',  professor, v => v !== '');
+    const v3 = validateField('field-turma',      turma,     v => v.length >= 2);
+    const v4 = validateField('field-dia',        dia,       v => v.length >= 2);
+    const v5 = validateField('field-resumo',     resumo,    v => v.length >= 10);
+
+    if (!v1 || !v2 || !v3 || !v4 || !v5) return;
+
+    // Loading state
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+
+    const payload = {
+      data: new Date(data).toISOString(),
+      professor,
+      turma,
+      dia,
+      resumo,
+    };
+
+    // Save locally
+    try {
+      const saved = JSON.parse(localStorage.getItem('resumos') || '[]');
+      saved.push(payload);
+      localStorage.setItem('resumos', JSON.stringify(saved));
+    } catch (_) {}
+
+    // Send to webhook
+    try {
+      const resp = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+      const json = await resp.json();
+
+      if (!json.url) throw new Error('URL da imagem não encontrada na resposta');
+
+      renderImagePage(json.url, json.download || json.url);
+      showPage('page-imagem');
+
+      showToast('Resumo processado!', 'Redirecionando para a imagem gerada…', 'success');
+
+      form.reset();
+      document.querySelectorAll('.field').forEach(f => f.classList.remove('has-error'));
+
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao processar resumo', 'Ocorreu um erro. Tente novamente.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('loading');
+    }
+  });
+
+  // ── Image page renderer ──────────────────
+  function renderImagePage(imageUrl, downloadUrl) {
+    const card = document.getElementById('img-card-content');
+
+    if (!imageUrl) {
+      card.innerHTML = `
+        <div class="error-state">
+          <p>URL da imagem não encontrada.</p>
+          <button class="btn btn-outline" onclick="goBack()">← Voltar</button>
+        </div>`;
+      return;
+    }
+
+    card.innerHTML = `
+      <img src="${escHtml(imageUrl)}" alt="Resumo gerado"
+           onerror="this.style.display='none'; document.getElementById('img-error').style.display='block'" />
+      <p id="img-error" style="display:none;color:var(--red);margin-bottom:16px;text-align:center">
+        Não foi possível carregar a imagem.
+      </p>
+      <div class="img-actions">
+        <button class="btn btn-outline" onclick="goBack()">← Voltar</button>
+        <button class="btn btn-green" onclick="downloadImg('${escHtml(downloadUrl)}')">⬇ Baixar Imagem</button>
+      </div>
+    `;
+  }
+
+  function goBack() {
+    showPage('page-form');
+  }
+
+  function downloadImg(url) {
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `resumo-${Date.now()}.png`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('Download iniciado', 'A imagem está sendo baixada…', 'success');
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Live validation (clear error on input) ─
+  ['data','professor','turma','dia','resumo'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      document.getElementById('field-' + id).classList.remove('has-error');
+    });
+  });
+</script>
+</body>
+</html>
